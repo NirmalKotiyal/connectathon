@@ -18,9 +18,7 @@
 <main id="main" class="layout">
   <div class="tool-head"><h1>SMART Testing EHR</h1><p>Send a request to a wallet and check its answer against the spec and, if you choose one, a test case.</p></div>
   <div class="col setup-col">
-    <details id="setup" class="setup" open>
-      <summary id="setup-summary">Set up a run</summary>
-
+    <div id="setup" class="setup">
       <section class="card">
         <h2>1. What to send</h2>
         <div class="seg smart-tabs" role="tablist" aria-label="Request source">
@@ -78,7 +76,7 @@
         <button type="button" id="send" class="send smart-btn primary block">Send</button>
         <p class="small">A web wallet opens in a new tab. The device's own wallet opens the system sheet.</p>
       </section>
-    </details>
+    </div>
 
     <section id="history" class="card" hidden>
       <h2>This browser's runs <span id="history-count"></span></h2>

@@ -38,6 +38,8 @@ type Run = {
   /** A test case, or a request file with no case. */
   caseId?: string; request?: string;
   faults?: string[]; size?: string; byUrl?: boolean; rawUrl?: string; declineAll?: boolean;
+  /** Close the wallet's tab instead of answering: nothing comes back, and there's no result to file. */
+  closeTab?: boolean;
   /** Item statuses the Testing Wallet forces, set through a config URL (needs `byUrl`). */
   status?: Record<string, string>;
   /** Leave the case's step undone (untick it in "Testing Wallet options"). */
@@ -54,6 +56,7 @@ const ALL_RUNS: Run[] = [
   { name: "share-records with items unavailable or declined", caseId: "share-records", byUrl: true, status: { coverage: "unavailable", immunizations: "declined" } },
   { name: "share-records with nothing shared", caseId: "share-records", byUrl: true, status: { patient: "unavailable", problems: "declined", allergies: "unavailable", medications: "declined", immunizations: "declined", coverage: "unavailable" } },
   { name: "decline all (HOLD-4)", request: "records.json", declineAll: true, expectText: /declined/i },
+  { name: "wallet tab closed", request: "records.json", closeTab: true, expectText: /^Nothing was shared: the wallet tab was closed\.\s*Send again$/ },
   // The Testing Wallet's response size setting: valid responses, only larger.
   { name: "size 512 KB", request: "records.json", size: "512k" },
   { name: "size 5 MB", request: "uscdi.json", size: "5m" },
@@ -134,8 +137,12 @@ async function runOne(browser: Browser, run: Run) {
     if (!clicked) break;
   }
   const started = Date.now();
-  await wallet.$eval(run.declineAll ? "#decline" : "#share", (b) => (b as HTMLButtonElement).click());
-  await page.waitForFunction(() => /passed|Passed|failed|Error|declined/.test(document.getElementById("status")!.textContent ?? ""), { timeout: 120000 });
+  if (run.closeTab) await wallet.close();
+  else await wallet.$eval(run.declineAll ? "#decline" : "#share", (b) => (b as HTMLButtonElement).click());
+  await page.waitForFunction(() => /passed|Passed|failed|Error|Nothing was shared/.test(document.getElementById("status")!.textContent ?? ""), { timeout: 120000 });
+  // A result to file only when a response came back.
+  if (!!(await page.$("#file")) === !!run.closeTab) errors.push(run.closeTab ? "the EHR offers to file a run with no response" : "the EHR doesn't offer to file the result");
+  if (run.closeTab && (await page.$eval("#send", (b) => (b as HTMLButtonElement).disabled))) errors.push("Send is disabled after the run");
   const status = await page.$eval("#status", (e) => e.textContent ?? "");
   const log = await page.$eval("#log", (e) => e.textContent ?? "");
   const result = await page.$eval("#result", (e) => (e as HTMLElement).innerText);

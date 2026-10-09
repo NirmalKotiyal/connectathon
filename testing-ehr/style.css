@@ -15,20 +15,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .layout { min-height: calc(100vh - 59px); }
 #case-info:empty { min-height: 150px; }
 .wallets:empty { min-height: 200px; }
-/* On narrow screens the setup summary names the scenario and wallet, usually on two lines. */
-@media (max-width: 860px) { .setup > summary { min-height: 64px; align-items: center; } }
 
-.layout { max-width: var(--container-wide, 1280px); margin: 0 auto; padding: 16px 24px; display: grid; gap: 16px; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); align-items: start; }
+.layout { max-width: var(--container-wide, 1280px); margin: 0 auto; padding: 16px 24px; display: grid; gap: 16px; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); align-items: start; align-content: start; }
 @media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); padding: 12px 16px; gap: 12px; } }
 .col { display: grid; gap: 12px; min-width: 0; }
+#result { display: grid; gap: 12px; min-width: 0; scroll-margin-top: 72px; }
 
-.setup > summary { list-style: none; cursor: pointer; font-weight: 600; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 8px; }
-.setup > summary::-webkit-details-marker { display: none; }
-.setup > summary::before { content: "▸"; color: var(--fg-3); }
-.setup[open] > summary::before { content: "▾"; }
-.setup[open] > summary { margin-bottom: 12px; }
-.setup > .card + .card { margin-top: 12px; }
-@media (min-width: 861px) { .setup > summary { display: none; } }
+.setup { display: grid; gap: 12px; min-width: 0; }
 
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: grid; gap: 10px; min-width: 0; }
 .card h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--fg-3); display: flex; justify-content: space-between; gap: 8px; }
@@ -78,7 +71,10 @@ input[type=checkbox], input[type=radio] { accent-color: var(--brand); }
 .actions { display: flex; flex-wrap: wrap; gap: 6px; }
 
 .empty { color: var(--fg-3); font-size: 13px; padding: 30px 12px; text-align: center; border: 1px dashed var(--border-strong); border-radius: 10px; }
-.waiting { display: flex; gap: 12px; align-items: center; padding: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+/* Waiting, and a run that ended without a response: one line and a button. */
+.waiting, .ended { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.waiting > div { flex: 1 1 200px; }
+.ended p { margin: 0; flex: 1 1 200px; }
 /* Waiting: the picker's motion (client 0.4, motion="subtle"). A dim wedge in
    the surface color turns round the starburst; only its transform animates. */
 .wait-mark { position: relative; width: 44px; height: 36px; flex: none; }
@@ -92,7 +88,6 @@ input[type=checkbox], input[type=radio] { accent-color: var(--brand); }
 /* The verdict: a status wash, and a mark in the status color with the wash as its text. */
 .verdict { --_s: var(--status-bad); --_w: var(--status-bad-wash); border-radius: 10px; padding: 12px; display: grid; gap: 8px; border: 1px solid color-mix(in srgb, var(--_s) 40%, transparent); background: var(--_w); }
 .verdict.pass { --_s: var(--status-ok); --_w: var(--status-ok-wash); }
-.verdict.declined { --_s: var(--status-warn); --_w: var(--status-warn-wash); }
 .verdict .head { display: flex; gap: 10px; align-items: center; }
 .verdict .mark { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--_s); color: var(--_w); font-weight: 700; flex: none; }
 .verdict b { font-size: 17px; line-height: 1.25; }

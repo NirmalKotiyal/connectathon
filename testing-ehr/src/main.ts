@@ -22,7 +22,7 @@ type CardView = { issuer?: string; valid: boolean; detail: string; resources: an
 type Run = {
   id: string; at: string; ms: number;
   label: string; caseId?: string; walletId: string; walletName: string; path: "native" | "web"; walletUrl?: string;
-  verdict: "pass" | "fail" | "declined";
+  verdict: "pass" | "fail";
   headline: string; message?: string;
   request: SmartCheckinRequest; checks: Check[];
   /** The test case's expectations, evaluated on the response. */
@@ -52,8 +52,11 @@ let library: LibraryItem[] = [];
 let offered: Wallet[] = [];
 let mode: "request" | "build" | "paste" = "request";
 const requestFiles = new Map<string, SmartCheckinRequest>();
-let runs: Run[] = store.get<Run[]>(RUNS_KEY, []);
+// Only runs that got a response are kept.
+let runs: Run[] = store.get<Run[]>(RUNS_KEY, []).filter((r) => (r.verdict as string) !== "declined");
 let showing: Run | undefined;
+/** A run is waiting for the wallet. */
+let waiting = false;
 
 // ---------------------------------------------------------------- loading
 async function load() {
@@ -391,9 +394,8 @@ function refresh() {
   state.className = `small ${r.ok ? "ok-line" : "bad-line"}`;
   state.textContent = r.ok ? `${r.request.items.length} item${r.request.items.length === 1 ? "" : "s"} · valid request` : r.error;
   const button = $("send") as HTMLButtonElement;
-  button.disabled = !r.ok || !w || !w.available;
+  button.disabled = waiting || !r.ok || !w || !w.available;
   button.innerHTML = r.ok && w ? `Send ${esc(r.short)} to ${esc(w.name)}${custom ? "<small>with Testing Wallet options</small>" : ""}` : "Send";
-  $("setup-summary").textContent = r.ok && w ? `${r.label} → ${w.name}` : "Set up a run";
 }
 
 // ---------------------------------------------------------------- running
@@ -419,16 +421,27 @@ async function run(input: { request: SmartCheckinRequest; label: string; caseId?
   const at = new Date().toISOString();
   const path: Run["path"] = wallet.kind === "platform" ? "native" : "web";
   ($("send") as HTMLButtonElement).disabled = true;
+  waiting = true;
   $("status").textContent = "Waiting for the wallet…";
-  $("result").innerHTML = `<div class="waiting" data-motion="subtle"><span class="wait-mark">${STARBURST}<span class="veil"></span></span><div><b>Waiting for ${esc(wallet.name)}</b><p class="small">${path === "web" ? "It opened in a new tab. Share there, and the result shows here." : "The system sheet should be open."}</p></div></div>`;
+  $("result").innerHTML = `<div class="waiting" data-motion="subtle"><span class="wait-mark">${STARBURST}<span class="veil"></span></span><div><b>Waiting for ${esc(wallet.name)}</b><p class="small">${path === "web" ? "It opened in a new tab. Share there, and the result shows here." : "The system sheet should be open."}</p></div><button type="button" id="cancel" class="smart-btn sm">Cancel</button></div>`;
   $("log").textContent = "";
-  if (matchMedia("(max-width: 860px)").matches) ($("setup") as HTMLDetailsElement).open = false;
+  // Cancel stops waiting at once: it closes a web wallet's tab, or aborts the system sheet.
+  let cancel!: () => void;
+  let stopped = false;
+  const cancelled = new Promise<never>((_, reject) => { cancel = () => { stopped = true; input.session.cancel(); reject(Object.assign(new Error("cancelled"), { name: "Cancelled" })); }; });
+  cancelled.catch(() => {});
+  $("cancel").onclick = () => cancel();
+  // Send is at the foot of the setup, often below the result's place: bring the waiting line into view.
+  const top = $("result").getBoundingClientRect().top;
+  if (top < 60 || top > innerHeight - 80) $("result").scrollIntoView({ block: "start" });
 
   const base = { id: crypto.randomUUID(), at, label: input.label, caseId: input.caseId, walletId: wallet.id, walletName: wallet.name, path, walletUrl: wallet.entry?.walletUrl, request };
   let result: Run;
   try {
     const bundle = await buildOrgIsoMdocRequest(request, { origin: location.origin, readerAuth: false });
-    const raw = await input.session.getCredential(bundle.navigatorArgument);
+    if (stopped) await cancelled;
+    const raw = await Promise.race([input.session.getCredential(bundle.navigatorArgument), cancelled]);
+    $("cancel").remove();
     const normalized = extractDcapiResponse(raw);
     const credential = typeof normalized === "string" ? { protocol: (raw as { protocol?: string })?.protocol ?? "org-iso-mdoc", data: { response: normalized } } : normalized;
     $("status").textContent = "Checking the response…";
@@ -459,26 +472,56 @@ async function run(input: { request: SmartCheckinRequest; label: string; caseId?
       }
     }
   } catch (e) {
+    waiting = false;
     const message = (e as Error).message;
-    const declined = ["NotAllowedError", "AbortError", "WalletDeclinedError"].includes((e as Error).name);
+    const reason = noResponse(e as Error);
+    if (reason) {
+      // Nothing came back to check: not a test result, so not kept or filed.
+      // (A test case whose step is to decline gets a response, with declined statuses.)
+      const ms = Math.round(performance.now() - started);
+      showNothing(reason, `Testing EHR run ${at}\nScenario ${input.label}; wallet ${wallet.id}${wallet.entry ? ` at ${wallet.entry.walletUrl}` : ""}; path ${path}\nNO RESPONSE after ${(ms / 1000).toFixed(1)} s: ${message}`);
+      refresh();
+      return;
+    }
     result = {
       ...base, ms: Math.round(performance.now() - started),
-      verdict: declined ? "declined" : "fail",
-      headline: declined ? `Declined in ${wallet.name}` : "The wallet didn't return a response",
+      verdict: "fail",
+      headline: "The wallet didn't return a response",
       message, checks: [], log: "",
     };
   }
+  waiting = false;
   result.log = logFor(result);
   const failedCount = result.checks.filter((c) => c.outcome === "fail").length + (result.expectations ?? []).filter((e) => e.outcome === "fail").length;
   const warnCount = result.checks.filter((c) => c.outcome === "warn").length;
   $("status").textContent =
     result.verdict === "pass" ? (warnCount ? `Passed with ${warnCount} warning(s).` : "All checks passed.")
-    : result.verdict === "declined" ? `The wallet declined or was closed: ${result.message}`
     : result.checks.length ? `${failedCount} check(s) failed${result.rejected ? "; response rejected" : ""}.` : `Error: ${result.message}`;
   runs = [result, ...runs].slice(0, 20);
   saveRuns();
   show(result);
   refresh();
+}
+
+/** Why nothing came back, when the run ended without a response; undefined for a wallet error. */
+function noResponse(e: Error): string | undefined {
+  if (e.name === "Cancelled") return "you cancelled.";
+  if (e.name === "WalletDeclinedError") return /closed/.test(e.message) ? "the wallet tab was closed." : "the wallet declined.";
+  if (e.name === "NotAllowedError" || e.name === "AbortError") return "the request was dismissed.";
+  const code = (e as Error & { code?: string }).code;
+  if (code === "timeout") return "the wallet didn't answer in time.";
+  if (code === "blocked") return "the browser blocked the wallet's tab. Allow pop-ups for this site.";
+  return undefined;
+}
+
+/** A run that ended without a response: one line, and Send again. */
+function showNothing(reason: string, log: string) {
+  showing = undefined;
+  $("status").textContent = `Nothing was shared: ${reason}`;
+  $("result").innerHTML = `<div class="ended"><p>Nothing was shared: ${esc(reason)}</p><button type="button" id="send-again" class="smart-btn sm primary">Send again</button></div>`;
+  ($("send-again") as HTMLButtonElement).onclick = () => send();
+  $("log").textContent = log;
+  renderHistory();
 }
 
 /** What an expectation traces to: a link to the spec requirement it checks, or the case's step. */
@@ -505,7 +548,7 @@ function logFor(r: Run): string {
     `Scenario ${r.label}; wallet ${r.walletId}${r.walletUrl ? ` at ${r.walletUrl}` : ""}; path ${r.path}`,
     ...(r.checks.length
       ? r.checks.map((c) => `[${c.outcome.toUpperCase()}] ${c.id}${c.rule ? ` (${c.rule})` : ""}: ${c.title}${c.detail ? ` — ${c.detail}` : ""}`)
-      : [`${r.verdict === "declined" ? "DECLINED" : "ERROR"}: ${r.message}`]),
+      : [`ERROR: ${r.message}`]),
     ...(r.expectations ?? []).map((e) => `[${e.outcome.toUpperCase()}] ${e.id} (${r.caseId}${e.rule ? `, ${e.rule}` : e.basis === "step" ? `, ${STEP_DONE}` : ""}): ${e.title}${e.detail ? ` — ${e.detail}` : ""}`),
   ].join("\n");
 }
@@ -538,7 +581,7 @@ async function decodeCards(smart: any, checks: Check[]): Promise<Record<string, 
 // ---------------------------------------------------------------- showing a run
 function show(r: Run) {
   showing = r;
-  const mark = r.verdict === "pass" ? "✓" : r.verdict === "declined" ? "–" : "✕";
+  const mark = r.verdict === "pass" ? "✓" : "✕";
   const kb = r.responseChars ? `${(r.responseChars / 1024).toFixed(1)} KB` : "";
   const failures = r.checks.filter((c) => c.outcome === "fail");
   const warnings = r.checks.filter((c) => c.outcome === "warn");
@@ -647,8 +690,8 @@ function renderHistory() {
     const b = document.createElement("button");
     b.type = "button";
     b.setAttribute("aria-current", String(showing?.id === r.id));
-    b.innerHTML = `<span class="dot ${r.verdict === "pass" ? "pass" : r.verdict === "declined" ? "declined" : "fail"}"></span><b>${esc(r.label)}</b><span class="when">${new Date(r.at).toLocaleTimeString()}</span><small>${esc(r.walletName)} · ${esc(r.headline)}</small>`;
-    b.onclick = () => show(r);
+    b.innerHTML = `<span class="dot ${r.verdict}"></span><b>${esc(r.label)}</b><span class="when">${new Date(r.at).toLocaleTimeString()}</span><small>${esc(r.walletName)} · ${esc(r.headline)}</small>`;
+    b.onclick = () => { if (!waiting) show(r); };
     return b;
   }));
 }
@@ -661,7 +704,7 @@ function shareLink(from: string, result: string, at: string): string {
 function resultLink(r: Run): string {
   const label = (id: string) => components.find((c) => c.id === id)?.label;
   const tc = catalog.find((t) => t.id === r.caseId);
-  const result = r.verdict === "pass" ? "pass" : r.verdict === "declined" ? "blocked" : "fail";
+  const result = r.verdict;
   const log = r.log.length > 6000 ? r.log.slice(0, 6000) + "\n… (truncated)" : r.log;
   const p = new URLSearchParams({
     template: "test-result.yml",
