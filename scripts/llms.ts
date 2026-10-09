@@ -30,7 +30,7 @@ const ORIGIN = "https://smart-health-checkin.org";
 const BASE: string = "/connectathon/";
 const TITLE = "SMART Health Check-in: Connectathon";
 const SUMMARY =
-  "The SMART Health Check-in connectathon: an online event where patients, clinic staff, and software teams try the draft standard and report how it went. It has a page for each kind of participant, how the event works, the test scenarios and their requests and questionnaires, the SMART Testing EHR (to test a wallet) and the SMART Testing Wallet (to test a check-in page), registration, the participant directory, results, and two prompts that turn an AI assistant into a guide for writing an experience report. The event's date isn't set yet.";
+  "The SMART Health Check-in connectathon: an online event where patients, clinic staff, and software teams try the draft standard and report how it went. It has a page for each kind of participant, how the event works, the test scenarios and their requests and questionnaires, the SMART Testing EHR (to test a wallet) and the SMART Testing Wallet (to test a check-in page), registration, the participant directory, results, and two prompts that turn an AI assistant into a guide for writing an experience report. The event is Kill the Clipboard Connectathon #2, online on Tuesday, November 3, 2026, 2:00–5:00 PM Eastern.";
 // Pages published but not in llms.txt, with the reason. A key ending in "/"
 // skips everything under that folder.
 const SKIP: Record<string, string> = { "not-found.html": "where a missing address goes; no content" };

@@ -1,12 +1,12 @@
 # SMART Health Check-in connectathon
 
-An online event where patients, clinic staff, and software teams try a new way of checking in for a visit and tell us how it feels.
+Kill the Clipboard Connectathon #2 is an online event on Tuesday, November 3, 2026, from 2:00 to 5:00 PM Eastern, where patients, clinic staff, and software teams try a new way of checking in for a visit and tell us how it feels.
 
 ## How the event works
 
-<p class="smart-callout warn"><b>Draft.</b> The event date isn't set yet, so dates below say "To be announced". Everything else linked here is live. Components marked "not yet" in the <a href="directory.html">Participant directory</a> aren't ready for testing.</p>
+<p class="smart-callout warn">The Zoom link will be posted here before the event. Components marked "not yet" in the <a href="directory.html">Participant directory</a> aren't ready for testing.</p>
 
-- **When and where.** KTC pre-visit check-in connectathon, {{TBD: event date and time}}, about 3 hours, on Zoom: {{TBD: Zoom link}}.
+- **Where.** On Zoom: {{TBD: Zoom link}}.
 - **What it's for.** Experience with a new way of checking in, not a formal conformance test. Software teams connect clinic systems to patients' health apps, and patients, clinic staff, and community members try the result. It uses the [SMART Health Check-in 1.0](https://smart-health-checkin.org/spec/) draft specification.
 - **One Zoom meeting.** Everyone joins the main room for the opening, the hourly check-ins, and the closing report-out, where participants share what they found.
 - **One chat.** Questions, pairing, and links go in `#kill-the-clipboard` on the CMS Health Tech Ecosystem Slack ([open channel](https://app.slack.com/client/E09AR4N78GN/C09BPE4NXPT)).
@@ -16,8 +16,8 @@ An online event where patients, clinic staff, and software teams try a new way o
 
 ## Schedule
 
-- **Three weeks before** ({{TBD: date}}): reference implementations, the [SMART Testing EHR](testing-ehr/) and [SMART Testing Wallet](testing-wallet/), the [wallet registry](#wallet-registry), and the [scenarios](#minimum-scenarios) with their [requests](requests/) are live.
-- **One week before** ({{TBD: date}}): software teams aim to have their component up for [self-serve testing](#how-to-test) and to have tried a first connection.
+- **Three weeks before** (Tuesday, October 13): reference implementations, the [SMART Testing EHR](testing-ehr/) and [SMART Testing Wallet](testing-wallet/), the [wallet registry](#wallet-registry), and the [scenarios](#minimum-scenarios) with their [requests](requests/) are live.
+- **One week before** (Tuesday, October 27): software teams aim to have their component up for [self-serve testing](#how-to-test) and to have tried a first connection.
 - **The event:** ideally spent on the harder problems and live debugging. Some people will still be finishing basic setup, and that's fine.
 
 ## How to test
