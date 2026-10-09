@@ -61,6 +61,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--brand); }
 .wallet .t { flex: 1; min-width: 0; display: grid; }
 .wallet small { color: var(--fg-3); font-size: 12px; overflow-wrap: anywhere; }
 .wallet .x { border: 0; background: none; color: var(--fg-3); cursor: pointer; font-size: 16px; padding: 0 4px; }
+#add-by-url { font-size: 13px; margin: 6px 0 -4px; }
 .add-wallet { display: flex; gap: 6px; }
 .add-wallet input { flex: 1; min-width: 0; }
 

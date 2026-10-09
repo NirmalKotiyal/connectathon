@@ -115,7 +115,12 @@ async function load() {
   $("history-btn").onclick = () => { $("history").hidden = !$("history").hidden; renderHistory(); };
   $("clear-history").onclick = () => { runs = []; saveRuns(); renderHistory(); };
 
-  renderWallets(params.get("wallet") ?? undefined);
+  renderWallets(walletFromLink(params) ?? params.get("wallet") ?? undefined);
+  // A #walletUrl= link pasted into this tab changes only the fragment, so the page doesn't reload.
+  addEventListener("hashchange", () => {
+    const id = walletFromLink(new URLSearchParams(location.hash.slice(1)));
+    if (id) { renderWallets(id); remember(); describeCase(); refresh(); }
+  });
   describeCase();
   refresh();
   renderHistory();
@@ -273,19 +278,48 @@ function renderWallets(select?: string) {
   }
 }
 
+/** Why a wallet URL can't be added, or undefined if it can: https, or http on localhost while developing. */
+function walletUrlProblem(value: string): string | undefined {
+  let url: URL;
+  try { url = new URL(value); } catch { return "Enter a full URL, starting with https://."; }
+  const local = url.hostname === "localhost" || url.hostname === "127.0.0.1" || url.hostname === "[::1]";
+  if (url.protocol === "https:" || (url.protocol === "http:" && local)) return undefined;
+  return "Use an https URL, or http on localhost while developing.";
+}
+
+/** Keep a wallet URL, exactly as given, in this browser's list, and return its wallet id. */
+function keepWalletUrl(value: string): string {
+  store.set(URLS_KEY, [...new Set([...customUrls(), value])]);
+  return `url:${value}`;
+}
+
+function showUrlProblem(problem?: string) {
+  const box = $("wallet-url-error");
+  box.textContent = problem ?? "";
+  box.hidden = !problem;
+}
+
+/** #walletUrl=<url> adds that web wallet, as if added by URL, and selects it. */
+function walletFromLink(params: URLSearchParams): string | undefined {
+  const value = params.get("walletUrl")?.trim();
+  if (!value) return undefined;
+  const problem = walletUrlProblem(value);
+  if (problem) {
+    ($("wallet-url") as HTMLInputElement).value = value;
+    showUrlProblem(`The link's walletUrl wasn't added. ${problem}`);
+    return undefined;
+  }
+  return keepWalletUrl(value);
+}
+
 function addWalletUrl() {
   const input = $("wallet-url") as HTMLInputElement;
-  let url: URL;
-  try { url = new URL(input.value); } catch { input.setCustomValidity("Enter a full URL"); input.reportValidity(); return; }
-  if (url.protocol !== "https:" && url.hostname !== "localhost" && url.hostname !== "127.0.0.1") {
-    input.setCustomValidity("Use https (or localhost while developing)");
-    input.reportValidity();
-    return;
-  }
-  input.setCustomValidity("");
-  store.set(URLS_KEY, [...new Set([...customUrls(), url.href])]);
+  const value = input.value.trim();
+  const problem = walletUrlProblem(value);
+  showUrlProblem(problem);
+  if (problem) return;
   input.value = "";
-  renderWallets(`url:${url.href}`);
+  renderWallets(keepWalletUrl(value));
   refresh();
 }
 
@@ -294,7 +328,9 @@ function remember() {
   const p = new URLSearchParams();
   if (currentCase()) p.set("case", currentCase()!.id);
   else if (mode === "request") p.set("request", ($("request-file") as HTMLSelectElement).value);
-  if (w) p.set("wallet", w.id);
+  // A wallet added by URL is linked by its URL, so the link works in any browser.
+  if (w?.id.startsWith("url:")) p.set("walletUrl", w.entry!.walletUrl);
+  else if (w) p.set("wallet", w.id);
   history.replaceState(null, "", `#${p}`);
 }
 

@@ -52,12 +52,13 @@
       <section class="card">
         <h2>3. Which wallet</h2>
         <div id="wallets" class="wallets" role="radiogroup" aria-label="Wallet"></div>
+        <h3 id="add-by-url"><label for="wallet-url">Add a wallet by URL</label></h3>
+        <p class="small">Test your web wallet before it's registered. Enter the address this page should open, using https, or http on localhost while you develop. The wallet stays in this browser, and this page's address then includes its URL, so you can share the link. A native wallet needs no adding: choose "Your phone's health app".</p>
         <form id="add-wallet" class="add-wallet">
-          <label class="smart-sr" for="wallet-url">Web wallet URL</label>
           <input id="wallet-url" type="url" placeholder="https://your-wallet.example/wallet.html" required>
           <button type="submit" class="smart-btn sm">Add</button>
         </form>
-        <p class="small">A wallet added by URL is kept in this browser, so you can test it before it's registered.</p>
+        <p id="wallet-url-error" class="small bad-line" role="alert" hidden></p>
         <details id="tw-options" class="group smart-details" hidden>
           <summary>Testing Wallet options <span id="tw-count" class="n"></span></summary>
           <p class="small">Opens the SMART Testing Wallet at one of its <a href="https://github.com/smart-health-checkin/connectathon/blob/main/testing-wallet/FEATURES.md#config-urls">config URLs</a>, its own URL format for test options (not part of SMART Health Check-in). You can paste such a URL into any Verifier's wallet list instead.</p>
