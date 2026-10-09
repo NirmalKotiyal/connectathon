@@ -21,7 +21,7 @@ The answer comes back encrypted to a key your page made for that request, and bo
 ## Joining
 
 - **Register:** [register your check-in page or app](register/) ([step 5 of Get started](#register)), ideally a week before the event.
-- **The live event:** on Zoom; the date, time, and link are on the [main page](./). Join the main room for the opening, the hourly check-ins, and the closing report-out. Pair with wallet teams in breakout rooms you start yourself ([how](./#how-the-event-works)).
+- **The live event:** Tuesday, November 3, 2026, 2:00–5:00 PM Eastern, on Zoom; the link will be on the [main page](./#how-the-event-works). Join the main room for the opening, the hourly check-ins, and the closing report-out. Pair with wallet teams in breakout rooms you start yourself ([how](./#how-the-event-works)).
 - **Questions:** ask in the [#kill-the-clipboard channel](https://app.slack.com/client/E09AR4N78GN/C09BPE4NXPT) on the CMS Health Tech Ecosystem Slack.
 
 ## Share what you found

@@ -21,7 +21,7 @@ Everything below works in a web browser on any phone, tablet, or computer, and t
 ## Joining
 
 - **Register:** you don't need to. The demos work any time, before, during, or after the event.
-- **The live event:** on Zoom; the date, time, and link are on the [main page](./). Join the main room for the opening, the hourly check-ins, and the closing report-out, where participants share what they found.
+- **The live event:** Tuesday, November 3, 2026, 2:00–5:00 PM Eastern, on Zoom; the link will be on the [main page](./#how-the-event-works). Join the main room for the opening, the hourly check-ins, and the closing report-out, where participants share what they found.
 - **Questions:** ask in the [#kill-the-clipboard channel](https://app.slack.com/client/E09AR4N78GN/C09BPE4NXPT) on the CMS Health Tech Ecosystem Slack.
 
 ## Share what you found
