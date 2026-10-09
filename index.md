@@ -5,9 +5,9 @@ Kill the Clipboard Connectathon #2 is an online event on Tuesday, November 3, 20
 ## How the event works
 
 - **What it's for.** Experience with a new way of checking in, not a formal conformance test. Software teams connect clinic systems to patients' health apps, and patients, clinic staff, and community members try the result. It uses the [SMART Health Check-in 1.0](https://smart-health-checkin.org/spec/) draft specification.
-- **One Zoom meeting.** [Join the meeting](https://leavittpartners.zoom.us/j/93930028539?pwd=N7hn4ZOhxGwJERa3N2LwdIVL9iFGul.1). Everyone meets in the main room for the opening, the hourly check-ins, and the closing report-out, where participants share what they found.
-- **One chat.** Questions, pairing, and links go in `#kill-the-clipboard` on the CMS Health Tech Ecosystem Slack ([open channel](https://app.slack.com/client/E09AR4N78GN/C09BPE4NXPT)).
-- **Breakout rooms you start yourself.** Two people debugging together: start a Slack huddle in a direct message; it has video and screen sharing. A group, or someone not on the Slack: open `https://meet.jit.si/ktc-checkin-<ehr>-<wallet>` and post the link in the channel.
+- **Zoom.** [Join the meeting](https://leavittpartners.zoom.us/j/93930028539?pwd=N7hn4ZOhxGwJERa3N2LwdIVL9iFGul.1). Everyone meets in the main room for the opening, the hourly check-ins, and the closing report-out, where participants share what they found.
+- **Slack.** Questions, pairing, and links go in `#kill-the-clipboard` on the CMS Health Tech Ecosystem Slack ([open channel](https://app.slack.com/client/E09AR4N78GN/C09BPE4NXPT)).
+- **Breakout rooms.** Two people debugging together: start a Slack huddle in a direct message; it has video and screen sharing. A group, or someone not on the Slack: open `https://meet.jit.si/ktc-checkin-<ehr>-<wallet>` and post the link in the channel.
 - **Only software registers.** Teams bringing a Verifier or a wallet register it ([How to test](#how-to-test)); everyone else just joins.
 - **Made-up data only.** Every patient, record, and clinic in the demos and test tools is synthetic. Never use real health information, even your own.
 
