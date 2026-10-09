@@ -4,14 +4,11 @@ Kill the Clipboard Connectathon #2 is an online event on Tuesday, November 3, 20
 
 ## How the event works
 
-<p class="smart-callout warn">Components marked "not yet" in the <a href="directory.html">Participant directory</a> aren't ready for testing.</p>
-
-- **Where.** On Zoom: [join the meeting](https://leavittpartners.zoom.us/j/93930028539?pwd=N7hn4ZOhxGwJERa3N2LwdIVL9iFGul.1).
 - **What it's for.** Experience with a new way of checking in, not a formal conformance test. Software teams connect clinic systems to patients' health apps, and patients, clinic staff, and community members try the result. It uses the [SMART Health Check-in 1.0](https://smart-health-checkin.org/spec/) draft specification.
-- **One Zoom meeting.** Everyone joins the main room for the opening, the hourly check-ins, and the closing report-out, where participants share what they found.
+- **One Zoom meeting.** [Join the meeting](https://leavittpartners.zoom.us/j/93930028539?pwd=N7hn4ZOhxGwJERa3N2LwdIVL9iFGul.1). Everyone meets in the main room for the opening, the hourly check-ins, and the closing report-out, where participants share what they found.
 - **One chat.** Questions, pairing, and links go in `#kill-the-clipboard` on the CMS Health Tech Ecosystem Slack ([open channel](https://app.slack.com/client/E09AR4N78GN/C09BPE4NXPT)).
 - **Breakout rooms you start yourself.** Two people debugging together: start a Slack huddle in a direct message; it has video and screen sharing. A group, or someone not on the Slack: open `https://meet.jit.si/ktc-checkin-<ehr>-<wallet>` and post the link in the channel.
-- **Registration is for software.** Teams bringing an EHR, portal, or wallet [register it](register/) so others can test against it (see the register step for [Verifier developers](verifier-developers.html#register) or [Wallet developers](wallet-developers.html#register)). Everyone else just joins.
+- **Only software registers.** Teams bringing a Verifier or a wallet register it ([How to test](#how-to-test)); everyone else just joins.
 - **Made-up data only.** Every patient, record, and clinic in the demos and test tools is synthetic. Never use real health information, even your own.
 
 ## Schedule
@@ -24,7 +21,7 @@ Kill the Clipboard Connectathon #2 is an online event on Tuesday, November 3, 20
 
 Software teams bring a Verifier (a clinic's check-in page, portal, kiosk, or app, which asks for data) or a wallet (the patient's health app, which answers). Make your component testable without you in the room, and list it in the [Participant directory](directory.html) by [registering](register/): a Verifier lists its check-in page URL, a web wallet goes into the [wallet registry](#wallet-registry), and a native wallet says how testers get it. Verifier and wallet teams run the scenarios in pairs, with as many counterparts as they can reach. Test early and alone against the [SMART Testing EHR](testing-ehr/) and the [SMART Testing Wallet](testing-wallet/), so the live event is left for problems that need two people. A failure is as useful as a pass, since it often points to a gap in the spec or an interoperability bug.
 
-Each scenario gives its request, the step for the person using the wallet, what the Verifier should see, what counts as a pass for each side, and how to run it with the test tools. Every response must also pass the spec's own checks, which the SMART Testing EHR runs and links to their requirements. Section links such as §5.6 go to the spec, [SMART Health Check-in 1.0](https://smart-health-checkin.org/spec/).
+Besides each scenario's own checks, every response must pass the spec's checks, which the SMART Testing EHR runs.
 
 ## Ground rules
 
@@ -47,12 +44,9 @@ Record each run through the [result form](https://github.com/smart-health-checki
 
 ## Shared resources
 
-The event's resources are all under `https://smart-health-checkin.org/connectathon/`.
-
 | Resource | Link |
 |---|---|
 | Who is bringing what | [Participant directory](directory.html); get listed with the [registration form](register/) |
-| Test results | [File a result](https://github.com/smart-health-checkin/connectathon/issues/new?template=test-result.yml); [all results](results.html) |
 | Web wallets for Verifier pages to list | [wallets.json](wallets.json) ([how it works](#wallet-registry)) |
 | Every scenario's request | [Test requests](requests/) |
 | A Verifier to test wallets with | [SMART Testing EHR](testing-ehr/) |
@@ -60,28 +54,10 @@ The event's resources are all under `https://smart-health-checkin.org/connectath
 | A native wallet for Android | [Reference Android wallet](#reference-android-wallet) |
 | A working check-in page | [Clinic check-in demo](https://smart-health-checkin.org/client/demo/), also [with the event registry](https://smart-health-checkin.org/client/demo/#wallets=https%3A%2F%2Fsmart-health-checkin.org%2Fconnectathon%2Fwallets.json) |
 | How web wallets talk to a Verifier page | [Web wallets](https://smart-health-checkin.org/client/docs/web-wallets.html) in the client docs |
-| Questions and pairing | `#kill-the-clipboard` on the CMS Health Tech Ecosystem Slack ([open the channel](https://app.slack.com/client/E09AR4N78GN/C09BPE4NXPT)) |
 
 ### Wallet registry
 
-The event registry, <https://smart-health-checkin.org/connectathon/wallets.json>, lists every web wallet in the [participant directory](directory.html#web-wallets) whose status is up. Verifier pages read it to list the wallets a patient can choose. It uses the format the client library reads ([Registry format](https://smart-health-checkin.org/client/docs/registry.html)):
-
-```json
-{
-  "source": "KTC SMART Health Check-in connectathon registry",
-  "wallets": [
-    {
-      "id": "example",
-      "name": "Example Health App",
-      "walletUrl": "https://example.org/checkin-wallet",
-      "description": "Web wallet with synthetic patient Jane Test.",
-      "homepage": "https://example.org",
-      "iconUrl": "https://example.org/icon.png",
-      "target": "tab"
-    }
-  ]
-}
-```
+The event registry, <https://smart-health-checkin.org/connectathon/wallets.json>, lists every web wallet in the [participant directory](directory.html#web-wallets) whose status is up. Verifier pages read it to list the wallets a patient can choose; its format is described in [Registry format](https://smart-health-checkin.org/client/docs/registry.html).
 
 You don't edit this file. The [registration form](register/) adds your web wallet to your organization's participant file, and the registry is built from those files ([fields](https://github.com/smart-health-checkin/connectathon/blob/main/CONTRIBUTING.md#fields-for-each-component)). Native wallets aren't in it, because the phone's own wallet chooser reaches them; they're listed in the [Participant directory](directory.html#native-wallets) only.
 
