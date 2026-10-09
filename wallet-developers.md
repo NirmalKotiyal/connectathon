@@ -22,7 +22,7 @@ Your answer is signed and encrypted to a key the clinic's page made for that req
 ## Joining
 
 - **Register:** [register your wallet](register/) ([step 6 of Get started](#register)), ideally a week before the event.
-- **The live event:** Tuesday, November 3, 2026, 2:00–5:00 PM Eastern, on Zoom; the link will be on the [main page](./#how-the-event-works). Join the main room for the opening, the hourly check-ins, and the closing report-out. Pair with EHR teams in breakout rooms you start yourself ([how](./#how-the-event-works)).
+- **The live event:** Tuesday, November 3, 2026, 2:00–5:00 PM Eastern, on Zoom; the link is on the [main page](./#how-the-event-works). Join the main room for the opening, the hourly check-ins, and the closing report-out. Pair with EHR teams in breakout rooms you start yourself ([how](./#how-the-event-works)).
 - **Questions:** ask in the [#kill-the-clipboard channel](https://app.slack.com/client/E09AR4N78GN/C09BPE4NXPT) on the CMS Health Tech Ecosystem Slack.
 - **Devices:** native-wallet testing needs your own phone: Android with Chrome, or an iPhone with Safari 26.
 

@@ -4,9 +4,9 @@ Kill the Clipboard Connectathon #2 is an online event on Tuesday, November 3, 20
 
 ## How the event works
 
-<p class="smart-callout warn">The Zoom link will be posted here before the event. Components marked "not yet" in the <a href="directory.html">Participant directory</a> aren't ready for testing.</p>
+<p class="smart-callout warn">Components marked "not yet" in the <a href="directory.html">Participant directory</a> aren't ready for testing.</p>
 
-- **Where.** On Zoom: {{TBD: Zoom link}}.
+- **Where.** On Zoom: [join the meeting](https://leavittpartners.zoom.us/j/93930028539?pwd=N7hn4ZOhxGwJERa3N2LwdIVL9iFGul.1).
 - **What it's for.** Experience with a new way of checking in, not a formal conformance test. Software teams connect clinic systems to patients' health apps, and patients, clinic staff, and community members try the result. It uses the [SMART Health Check-in 1.0](https://smart-health-checkin.org/spec/) draft specification.
 - **One Zoom meeting.** Everyone joins the main room for the opening, the hourly check-ins, and the closing report-out, where participants share what they found.
 - **One chat.** Questions, pairing, and links go in `#kill-the-clipboard` on the CMS Health Tech Ecosystem Slack ([open channel](https://app.slack.com/client/E09AR4N78GN/C09BPE4NXPT)).

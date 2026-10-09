@@ -17,7 +17,7 @@ SMART Health Check-in lets a patient answer a clinic's check-in questions from a
 ## Joining
 
 - **Register:** you don't need to.
-- **The live event:** Tuesday, November 3, 2026, 2:00–5:00 PM Eastern, on Zoom; the link will be under [How the event works](./#how-the-event-works) on the Connectathon front page. Join the main room for the opening, the hourly check-ins, and the closing report-out, where participants share what they found.
+- **The live event:** Tuesday, November 3, 2026, 2:00–5:00 PM Eastern, on Zoom; the link is under [How the event works](./#how-the-event-works) on the Connectathon front page. Join the main room for the opening, the hourly check-ins, and the closing report-out, where participants share what they found.
 - **Questions:** ask in the [#kill-the-clipboard channel](https://app.slack.com/client/E09AR4N78GN/C09BPE4NXPT) on the CMS Health Tech Ecosystem Slack.
 
 ## Share what you found
