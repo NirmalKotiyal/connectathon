@@ -44,6 +44,8 @@ body:
       label: Verifier
       description: The side that asked for data. EHR check-in pages, patient portals, kiosks, and clinic apps are Verifiers.
       options:
+        - "Comanage Check-in Kiosk (Healthcare Registries, LLC, comanage-kiosk)"
+        - "Comanage SMART Health Check-in (Healthcare Registries, LLC, comanage)"
         - "Example native Verifier app (SMART Health IT, smart-verifier-app)"
         - "Testing EHR (SMART Health IT, smart-testing-ehr)"
         - "Other (say which in the note)"
