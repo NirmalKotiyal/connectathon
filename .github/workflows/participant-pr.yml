@@ -35,6 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4   # main, not the PR
+      # The output is "verdict": github-script sets its own "result" output (the
+      # script's return value), which would overwrite one named "result".
       - id: owners
         uses: actions/github-script@v7
         with:
@@ -47,7 +49,7 @@ jobs:
             const participantFile = (f) => /^participants\/[a-z0-9][a-z0-9-]*\.json$/.test(f) && !["participants/schema.json", "participants/index.json"].includes(f);
             const others = files.filter((f) => !participantFile(f.filename) || (f.previous_filename && !participantFile(f.previous_filename)));
             if (others.length || maintainer || pr.base.ref !== "main" || !pr.head.repo) {
-              core.setOutput("result", "manual");
+              core.setOutput("verdict", "manual");
               core.info(others.length ? `touches ${others.map((f) => f.previous_filename ?? f.filename).join(", ")}`
                 : maintainer ? "maintainer PR" : pr.head.repo ? `targets ${pr.base.ref}` : "head repository is gone");
               return;
@@ -83,17 +85,17 @@ jobs:
               }
               fs.writeFileSync(f.filename, text);   // PR data only, for validation below
             }
-            core.setOutput("result", problems.length ? "not-owner" : "owner");
+            core.setOutput("verdict", problems.length ? "not-owner" : "owner");
             core.setOutput("problems", problems.join("\n"));
-      - if: steps.owners.outputs.result == 'owner'
+      - if: steps.owners.outputs.verdict == 'owner'
         uses: oven-sh/setup-bun@v2
-      - if: steps.owners.outputs.result == 'owner'
+      - if: steps.owners.outputs.verdict == 'owner'
         id: validate
         shell: bash   # -o pipefail, so a failing check isn't hidden by tee
         run: |
           bun install --frozen-lockfile
           bun run check 2>&1 | tee check.txt
-      - if: steps.owners.outputs.result == 'owner' && steps.validate.outcome == 'success'
+      - if: steps.owners.outputs.verdict == 'owner' && steps.validate.outcome == 'success'
         uses: actions/github-script@v7
         with:
           script: |
@@ -108,7 +110,7 @@ jobs:
           script: |
             const out = require("fs").readFileSync("check.txt", "utf8").slice(-4000);
             await github.rest.issues.createComment({ ...context.repo, issue_number: context.payload.pull_request.number, body: `The participant files don't pass the checks yet:\n\n\`\`\`\n${out}\n\`\`\`\nPush a fix to this branch and it will be checked again. The [registration form](https://smart-health-checkin.org/connectathon/register/) checks the same rules as you fill it in, and explains each problem. The fields are described in [CONTRIBUTING.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md#fields-for-each-component).` });
-      - if: steps.owners.outputs.result == 'not-owner'
+      - if: steps.owners.outputs.verdict == 'not-owner'
         uses: actions/github-script@v7
         env:
           PROBLEMS: ${{ steps.owners.outputs.problems }}

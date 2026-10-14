@@ -1,7 +1,10 @@
 name: Check
 
 on:
+  # A PR that changes only participant files is checked by participant-pr.yml,
+  # which never runs the PR's code, so no maintainer has to approve a run.
   pull_request:
+    paths-ignore: ["participants/*.json"]
   push:
     branches: [main]
 
