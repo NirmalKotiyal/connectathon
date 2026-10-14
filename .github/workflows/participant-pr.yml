@@ -3,7 +3,8 @@ name: Participant file PR
 # Owners edit their own participant file; their PRs merge automatically.
 #
 # - A PR that only changes participants/*.json, whose author is listed in
-#   contacts[].github of every file it touches, is validated and squash-merged.
+#   contacts[].github of every file it touches, is validated, committed to
+#   main, and closed.
 #   For an existing file, the owners are the contacts in the file on main, so
 #   a PR can't add its own author. For a new file, the author must list
 #   themselves.
@@ -95,15 +96,35 @@ jobs:
         run: |
           bun install --frozen-lockfile
           bun run check 2>&1 | tee check.txt
+      # The workflow commits the checked files to main itself and closes the PR,
+      # rather than merging it: the token can't merge a fork's branch that is
+      # behind main once main's workflow files have changed.
       - if: steps.owners.outputs.verdict == 'owner' && steps.validate.outcome == 'success'
+        id: commit
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          LOGIN: ${{ github.event.pull_request.user.login }}
+          USER_ID: ${{ github.event.pull_request.user.id }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A participants/
+          git commit -q -m "$TITLE (#$NUMBER)" -m "Co-authored-by: $LOGIN <$USER_ID+$LOGIN@users.noreply.github.com>"
+          git pull -q --rebase origin main
+          git push -q origin HEAD:main
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - if: steps.commit.outcome == 'success'
         uses: actions/github-script@v7
+        env:
+          SHA: ${{ steps.commit.outputs.sha }}
         with:
           script: |
             const pr = context.payload.pull_request;
-            await github.rest.pulls.merge({ ...context.repo, pull_number: pr.number, merge_method: "squash", sha: pr.head.sha });
-            // A merge by this workflow's token doesn't trigger other workflows; start the site build.
+            // A push by this workflow's token doesn't trigger other workflows; start the site build.
             await github.rest.actions.createWorkflowDispatch({ ...context.repo, workflow_id: "pages.yml", ref: "main" });
-            await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number, body: `Merged automatically: @${pr.user.login} is a contact on every file this changes, and the files pass the checks. The site and \`wallets.json\` update in a few minutes.` });
+            await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number, body: `Added to main automatically as ${process.env.SHA}: @${pr.user.login} is a contact on every file this changes, and the files pass the checks. The site and \`wallets.json\` update in a few minutes.` });
+            await github.rest.pulls.update({ ...context.repo, pull_number: pr.number, state: "closed" });
       - if: failure() && steps.validate.outcome == 'failure'
         uses: actions/github-script@v7
         with:

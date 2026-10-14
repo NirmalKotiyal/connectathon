@@ -52,7 +52,7 @@ results. Deploys to smart-health-checkin.org/connectathon/ on every push to
 - The client library is pinned to a release tarball in `package.json`.
   Bump the URL to upgrade; nothing updates it automatically.
 - Participants edit their own `participants/*.json` by PR;
-  `participant-pr.yml` validates and auto-merges owners' changes.
+  `participant-pr.yml` validates owners' changes, commits them to `main`, and closes the PR.
 - `main` has a ruleset ("Protect main") that blocks force-pushes and deleting
   the branch. Direct pushes and the workflows' pushes and merges still work;
   never rewrite `main`'s history.
