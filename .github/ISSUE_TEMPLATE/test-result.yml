@@ -60,6 +60,7 @@ body:
         - "haau3 Web Wallet (haau3, haau3)"
         - "SMART reference Android wallet (SMART Health IT, smart-android-wallet)"
         - "SMART Testing Wallet (SMART Health IT, smart-testing-wallet)"
+        - "Well (Well App by BairWise, well-wallet)"
         - "Other (say which in the note)"
     validations:
       required: true
