@@ -7,5 +7,5 @@ jobs:
   t:
     runs-on: ubuntu-latest
     steps:
-      - run: gh api -X PUT repos/${{ github.repository }}/pulls/7/merge -f merge_method=squash -i | head -30
+      - run: gh api -X PUT repos/${{ github.repository }}/pulls/9/merge -f merge_method=squash -i | head -30
         env: { GH_TOKEN: "${{ github.token }}" }
