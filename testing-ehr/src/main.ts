@@ -202,15 +202,15 @@ function describeCase() {
 }
 
 /** The request Send will use, or why there isn't one. */
-function currentRequest(): { ok: true; request: SmartCheckinRequest; label: string; short: string; caseId?: string } | { ok: false; error: string } {
+function currentRequest(): { ok: true; request: SmartCheckinRequest; label: string; caseId?: string } | { ok: false; error: string } {
   if (mode === "request") {
     const file = ($("request-file") as HTMLSelectElement).value;
     const req = requestFiles.get(file);
     if (!req) return { ok: false, error: "Loading the requests…" };
     const tc = currentCase();
     return tc
-      ? { ok: true, request: req, label: caseLabel(tc), short: tc.id, caseId: tc.id }
-      : { ok: true, request: req, label: file, short: file.replace(/\.json$/, "") };
+      ? { ok: true, request: req, label: caseLabel(tc), caseId: tc.id }
+      : { ok: true, request: req, label: file };
   }
   if (mode === "build") {
     const keys = [...document.querySelectorAll<HTMLInputElement>("#item-library input:checked")].map((i) => i.value);
@@ -221,12 +221,12 @@ function currentRequest(): { ok: true; request: SmartCheckinRequest; label: stri
     const request = { type: "smart-health-checkin-request", version: "1", id: "custom", purpose: "Testing EHR: custom request", fhirVersions: ["4.0.1"], items } as SmartCheckinRequest;
     const v = validateSmartCheckinRequest(request);
     const n = `${items.length} item${items.length === 1 ? "" : "s"}`;
-    return v.ok ? { ok: true, request, label: `Custom · ${n}`, short: n } : { ok: false, error: v.error };
+    return v.ok ? { ok: true, request, label: `Custom · ${n}` } : { ok: false, error: v.error };
   }
   try {
     const request = JSON.parse(($("paste") as HTMLTextAreaElement).value);
     const v = validateSmartCheckinRequest(request);
-    return v.ok ? { ok: true, request, label: `Pasted · ${request.items.length} item${request.items.length === 1 ? "" : "s"}`, short: "your request" } : { ok: false, error: v.error };
+    return v.ok ? { ok: true, request, label: `Pasted · ${request.items.length} item${request.items.length === 1 ? "" : "s"}` } : { ok: false, error: v.error };
   } catch (e) {
     return { ok: false, error: `Not JSON: ${(e as Error).message}` };
   }
@@ -395,7 +395,7 @@ function refresh() {
   state.textContent = r.ok ? `${r.request.items.length} item${r.request.items.length === 1 ? "" : "s"} · valid request` : r.error;
   const button = $("send") as HTMLButtonElement;
   button.disabled = waiting || !r.ok || !w || !w.available;
-  button.innerHTML = r.ok && w ? `Send ${esc(r.short)} to ${esc(w.name)}${custom ? "<small>with Testing Wallet options</small>" : ""}` : "Send";
+  button.innerHTML = r.ok && w ? `Send request to ${esc(w.name)}${custom ? "<small>with Testing Wallet options</small>" : ""}` : "Send";
 }
 
 // ---------------------------------------------------------------- running
