@@ -31,6 +31,13 @@
           <select id="request-file"></select>
         </div>
         <div data-panel="build" hidden>
+          <label class="build-by" for="build-by">Ask for records by
+            <select id="build-by">
+              <option value="profile">Profile, as the scenarios ask</option>
+              <option value="type">Resource type only</option>
+              <option value="none">No selector: the patient decides</option>
+            </select>
+          </label>
           <div id="item-library" class="item-library"></div>
         </div>
         <div data-panel="paste" hidden>
@@ -38,6 +45,7 @@
           <textarea id="paste" spellcheck="false" rows="12"></textarea>
         </div>
         <p id="request-state" class="small"></p>
+        <p id="request-link-note" class="small" hidden>This page's address now includes this request, so a link to it opens with the same request in Paste.</p>
       </section>
 
       <section class="card">

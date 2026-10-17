@@ -38,6 +38,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--brand); }
 .case-info { display: grid; gap: 6px; margin-top: 8px; }
 .case-info p { margin: 0; font-size: 13px; color: var(--fg-2); }
 
+.build-by { display: grid; gap: 4px; margin-bottom: 8px; font-size: 13px; color: var(--fg-2); }
 .item-library { display: grid; gap: 2px; }
 .item-library label { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; cursor: pointer; }
 .item-library input { margin-top: 3px; }

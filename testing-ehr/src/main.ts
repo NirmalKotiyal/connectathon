@@ -95,15 +95,13 @@ async function load() {
   if (params.get("request") && requestFiles.has(params.get("request")!)) requestSelect.value = params.get("request")!;
   if (params.get("case") && catalog.some((t) => t.id === params.get("case"))) { caseSelect.value = params.get("case")!; chooseCase(); }
 
-  $("item-library").replaceChildren(...library.map((l) => {
-    const label = document.createElement("label");
-    label.innerHTML = `<input type="checkbox" value="${esc(l.key)}"><span>${esc(l.label)}<small>${esc(l.note)}</small></span>`;
-    return label;
-  }));
-  $("item-library").addEventListener("change", refresh);
+  renderLibrary();
+  $("item-library").addEventListener("change", () => { refresh(); remember(); });
+  $("build-by").addEventListener("change", () => { renderLibrary(); refresh(); remember(); });
   ($("paste") as HTMLTextAreaElement).value = JSON.stringify(requestFiles.get("insurance-card.json") ?? {}, null, 2);
-  $("paste").addEventListener("input", refresh);
-  for (const b of document.querySelectorAll<HTMLButtonElement>(".seg button")) b.onclick = () => setMode(b.dataset.mode as typeof mode);
+  $("paste").addEventListener("input", () => { linkProblem = undefined; refresh(); remember(); });
+  for (const b of document.querySelectorAll<HTMLButtonElement>(".seg button")) b.onclick = () => { setMode(b.dataset.mode as typeof mode); remember(); };
+  if (params.get("requestJson")) requestFromLink(params.get("requestJson")!);
 
   $("tw-faults").replaceChildren(...Object.entries(FAULTS).map(([f, { does: what }]) => {
     const label = document.createElement("label");
@@ -121,7 +119,10 @@ async function load() {
   renderWallets(walletFromLink(params) ?? params.get("wallet") ?? undefined);
   // A #walletUrl= link pasted into this tab changes only the fragment, so the page doesn't reload.
   addEventListener("hashchange", () => {
-    const id = walletFromLink(new URLSearchParams(location.hash.slice(1)));
+    const linked = new URLSearchParams(location.hash.slice(1));
+    const json = linked.get("requestJson");
+    if (json && json !== linkedRequest) { requestFromLink(json); refresh(); }
+    const id = walletFromLink(linked);
     if (id) { renderWallets(id); remember(); describeCase(); refresh(); }
   });
   describeCase();
@@ -138,20 +139,100 @@ function buildLibrary(): LibraryItem[] {
       const sig = JSON.stringify(item);
       if (seen.has(sig)) continue;
       seen.add(sig);
-      const c: any = item.content;
-      const what =
-        c.kind === "form.fhir"
-          ? `form, ${c.questionnaire ? "inline" : "by reference"}`
-          : [
-              c.profiles?.map((p: string) => p.split("/").pop()).join(", "),
-              c.profilesFrom?.length ? `profiles from ${c.profilesFrom.map((p: string) => p.split("/").pop()).join(", ")}` : "",
-              c.resourceTypes?.join(", "),
-            ].filter(Boolean).join(" · ") || "anything";
-      const card = item.accept.includes("application/smart-health-card") ? " · health card accepted" : "";
-      out.push({ key: `lib-${out.length}`, item, label: item.title, note: `${item.id}: ${what}${card}` });
+      out.push({ key: `lib-${out.length}`, item, label: item.title, note: selectorNote(item) });
     }
   }
   return out;
+}
+
+// The base resource type of each profile the scenario requests name, so Build
+// can ask for the same records by type alone. A profile missing here keeps its
+// item as written under "Resource type only".
+const US_CORE = "http://hl7.org/fhir/us/core/StructureDefinition/";
+const PROFILE_TYPES: Record<string, string> = {
+  [`${US_CORE}us-core-patient`]: "Patient",
+  [`${US_CORE}us-core-condition-problems-health-concerns`]: "Condition",
+  [`${US_CORE}us-core-allergyintolerance`]: "AllergyIntolerance",
+  [`${US_CORE}us-core-medicationrequest`]: "MedicationRequest",
+  [`${US_CORE}us-core-immunization`]: "Immunization",
+  [`${US_CORE}us-core-coverage`]: "Coverage",
+  "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage": "Coverage",
+};
+
+type AskBy = "profile" | "type" | "none";
+const askBy = (): AskBy => ($("build-by") as HTMLSelectElement).value as AskBy;
+
+/** A library item asked another way. Forms and items that can't be rewritten stay as written. */
+function askedBy(item: LibraryItem["item"], by: AskBy): LibraryItem["item"] {
+  const c: any = item.content;
+  if (c.kind !== "selection.fhir" || by === "profile") return item;
+  if (by === "none") return { ...item, content: { kind: "selection.fhir" } };
+  if (!c.profiles?.length && !c.profilesFrom?.length) return item;
+  // A family has no single type; a request that already narrows by type keeps that.
+  const types = c.resourceTypes?.length ? c.resourceTypes : c.profilesFrom?.length ? undefined : c.profiles.map((p: string) => PROFILE_TYPES[p.split("|")[0]!]);
+  if (!types || types.some((t: string | undefined) => !t)) return item;
+  return { ...item, content: { kind: "selection.fhir", resourceTypes: [...new Set<string>(types)] } };
+}
+
+/** What an item's selector asks for, in a few words. */
+function selectorNote(item: LibraryItem["item"]): string {
+  const c: any = item.content;
+  const what =
+    c.kind === "form.fhir"
+      ? `form, ${c.questionnaire ? "inline" : "by reference"}`
+      : [
+          c.profiles?.map((p: string) => p.split("/").pop()).join(", "),
+          c.profilesFrom?.length ? `profiles from ${c.profilesFrom.map((p: string) => p.split("/").pop()).join(", ")}` : "",
+          c.resourceTypes?.join(", "),
+        ].filter(Boolean).join(" · ") || "no selector";
+  const card = item.accept.includes("application/smart-health-card") ? " · health card accepted" : "";
+  return `${item.id}: ${what}${card}`;
+}
+
+/** The Build checklist, each note showing the selector Send will use. */
+function renderLibrary() {
+  const by = askBy();
+  const ticked = new Set([...document.querySelectorAll<HTMLInputElement>("#item-library input:checked")].map((i) => i.value));
+  $("item-library").replaceChildren(...library.map((l) => {
+    const asked = askedBy(l.item, by);
+    const kept = by !== "profile" && asked === l.item && l.item.content.kind === "selection.fhir" ? " (kept as written)" : "";
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" value="${esc(l.key)}"${ticked.has(l.key) ? " checked" : ""}><span>${esc(l.label)}<small>${esc(selectorNote(asked) + kept)}</small></span>`;
+    return label;
+  }));
+}
+
+// ---------------------------------------------------------------- request links
+// #requestJson=<base64url of the request's JSON> opens the page with that
+// request in Paste. Build and Paste keep it in the address as you edit.
+let linkedRequest: string | undefined;
+/** Why a linked request couldn't be read, until Paste is edited. */
+let linkProblem: string | undefined;
+
+function toB64url(text: string): string {
+  let bin = "";
+  for (const b of new TextEncoder().encode(text)) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function fromB64url(value: string): string {
+  const bin = atob(value.replace(/-/g, "+").replace(/_/g, "/"));
+  return new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
+}
+
+/** Put a linked request in Paste. One that doesn't decode is shown as an error there. */
+function requestFromLink(value: string) {
+  linkedRequest = value;
+  linkProblem = undefined;
+  let text = "";
+  try {
+    text = fromB64url(value);
+    try { text = JSON.stringify(JSON.parse(text), null, 2); } catch { /* not JSON: Paste reports it */ }
+  } catch {
+    linkProblem = "The link's requestJson isn't a base64url-encoded request. Paste the request here instead.";
+  }
+  ($("paste") as HTMLTextAreaElement).value = text;
+  setMode("paste");
 }
 
 /** What a request file asks for, and the test cases that use it: "The answers to the GAD-7 form, named by its URL only (form-by-reference)". */
@@ -167,6 +248,7 @@ function setMode(next: typeof mode) {
   if (mode !== "request") { ($("case") as HTMLSelectElement).value = ""; describeCase(); }
   for (const b of document.querySelectorAll<HTMLButtonElement>(".seg button")) b.setAttribute("aria-selected", String(b.dataset.mode === mode));
   for (const p of document.querySelectorAll<HTMLElement>("[data-panel]")) p.hidden = p.dataset.panel !== mode;
+  $("request-link-note").hidden = mode === "request";
   refresh();
 }
 
@@ -214,7 +296,7 @@ function currentRequest(): { ok: true; request: SmartCheckinRequest; label: stri
   }
   if (mode === "build") {
     const keys = [...document.querySelectorAll<HTMLInputElement>("#item-library input:checked")].map((i) => i.value);
-    const items = library.filter((l) => keys.includes(l.key)).map((l) => l.item);
+    const items = library.filter((l) => keys.includes(l.key)).map((l) => askedBy(l.item, askBy()));
     if (!items.length) return { ok: false, error: "Tick at least one item." };
     const ids = items.map((i) => i.id);
     if (new Set(ids).size !== ids.length) return { ok: false, error: "Two ticked items share an id. Untick one of them." };
@@ -223,6 +305,7 @@ function currentRequest(): { ok: true; request: SmartCheckinRequest; label: stri
     const n = `${items.length} item${items.length === 1 ? "" : "s"}`;
     return v.ok ? { ok: true, request, label: `Custom · ${n}` } : { ok: false, error: v.error };
   }
+  if (linkProblem) return { ok: false, error: linkProblem };
   try {
     const request = JSON.parse(($("paste") as HTMLTextAreaElement).value);
     const v = validateSmartCheckinRequest(request);
@@ -331,6 +414,11 @@ function remember() {
   const p = new URLSearchParams();
   if (currentCase()) p.set("case", currentCase()!.id);
   else if (mode === "request") p.set("request", ($("request-file") as HTMLSelectElement).value);
+  else {
+    // Build and Paste: the request itself, so the link opens with it in Paste.
+    const r = currentRequest();
+    if (r.ok) p.set("requestJson", (linkedRequest = toB64url(JSON.stringify(r.request))));
+  }
   // A wallet added by URL is linked by its URL, so the link works in any browser.
   if (w?.id.startsWith("url:")) p.set("walletUrl", w.entry!.walletUrl);
   else if (w) p.set("wallet", w.id);
