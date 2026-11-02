@@ -1,23 +1,26 @@
 {
-   "organization": "participants/wallet.json",
-   "homepage": "https://sandbox.serenicarektc.com/",
-   "contacts": [
-     {
-       "name": "Tayaru Bayyana",
-       "email": "tayaru.bayyana@serenicare.ai"
-     },
-     {
-       "name": "OmPrakash Sahkanu",
-       "email": "omprakash.sahkanu@serenicare.ai"
-     }
-   ],
-   "components": [
-     {
-       "id": "participants-wallet-json-serenicare-ai-ktc",
-       "role": "verifier",
-       "name": "SereniCare AI KTC",
-       "status": "not-yet",
-       "url": "https://sandbox.serenicarektc.com/wallet"
-     }
-   ]
- }
+  "organization": "SereniCare AI",
+  "homepage": "https://sandbox.serenicarektc.com/",
+  "contacts": [
+    {
+      "name": "Tayaru Bayyana",
+      "email": "tayaru.bayyana@serenicare.ai"
+    },
+    {
+      "name": "OmPrakash Sahkanu",
+      "email": "omprakash.sahkanu@serenicare.ai"
+    }
+  ],
+  "components": [
+    {
+      "id": "serenicare-ai-ktc",
+      "role": "web-wallet",
+      "name": "SereniCare AI KTC",
+      "description": "A patient wallet from SereniCare AI: verify your identity with CLEAR or ID.me, and it gathers your records from across the TEFCA network to share at check-in.",
+      "status": "up",
+      "walletUrl": "https://sandbox.serenicarektc.com/wallet",
+      "iconUrl": "https://sandbox.serenicarektc.com/apple-touch-icon.png",
+      "notes": "After you choose Continue, the wallet asks you to verify your identity with CLEAR or ID.me (the home page lists test identities), then fetches records, which can take 5 to 10 minutes. Sandbox, synthetic data only."
+    }
+  ]
+}
