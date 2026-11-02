@@ -58,6 +58,7 @@ body:
     attributes:
       label: Wallet
       options:
+        - "bwell-wallet (Bwell, bwell-wallet)"
         - "CareAgents (FHIR IQ, fhir-iq-careagents)"
         - "Flexpa Health Wallet (Flexpa, flexpa)"
         - "haau3 Web Wallet (haau3, haau3)"
