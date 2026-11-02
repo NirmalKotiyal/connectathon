@@ -1,0 +1,23 @@
+{
+   "organization": "participants/wallet.json",
+   "homepage": "https://sandbox.serenicarektc.com/",
+   "contacts": [
+     {
+       "name": "Tayaru Bayyana",
+       "email": "tayaru.bayyana@serenicare.ai"
+     },
+     {
+       "name": "OmPrakash Sahkanu",
+       "email": "omprakash.sahkanu@serenicare.ai"
+     }
+   ],
+   "components": [
+     {
+       "id": "participants-wallet-json-serenicare-ai-ktc",
+       "role": "verifier",
+       "name": "SereniCare AI KTC",
+       "status": "not-yet",
+       "url": "https://sandbox.serenicarektc.com/wallet"
+     }
+   ]
+ }
