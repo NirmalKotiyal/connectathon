@@ -48,7 +48,6 @@ body:
         - "Comanage Check-in Kiosk (Healthcare Registries, LLC, comanage-kiosk)"
         - "Comanage SMART Health Check-in (Healthcare Registries, LLC, comanage)"
         - "Example native Verifier app (SMART Health IT, smart-verifier-app)"
-        - "SereniCare AI KTC (participants/wallet.json, participants-wallet-json-serenicare-ai-ktc)"
         - "Testing EHR (SMART Health IT, smart-testing-ehr)"
         - "Other (say which in the note)"
     validations:
@@ -63,6 +62,7 @@ body:
         - "haau3 Web Wallet (haau3, haau3)"
         - "MyDigiRecords Health Wallet (Android) (MyDigiRecords, mydigirecords-mydigirecords-health-wallet-android)"
         - "MyDigiRecords Health Wallet (MyDigiRecords, mydigirecords-health-wallet)"
+        - "SereniCare AI KTC (SereniCare AI, serenicare-ai-ktc)"
         - "SMART reference Android wallet (SMART Health IT, smart-android-wallet)"
         - "SMART Testing Wallet (SMART Health IT, smart-testing-wallet)"
         - "Tula (RealActivity, realactivity-tula)"
